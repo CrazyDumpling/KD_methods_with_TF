@@ -37,13 +37,13 @@ def main(_):
 
     should_log          = 100
     save_summaries_secs = 20
-    tf.logging.set_verbosity(tf.logging.INFO)
+    tf.logging.set_verbosity(tf.logging.INFO)       #将 TensorFlow 日志信息输出到屏幕
     gpu_num = '0'
 
     if FLAGS.Distillation == 'None':
         FLAGS.Distillation = None
         
-    train_images, train_labels, val_images, val_labels, pre_processing, teacher = Dataloader(FLAGS.dataset, home_path, FLAGS.model_name)
+    train_images, train_labels, val_images, val_labels, pre_processing, teacher = Dataloader(FLAGS.dataset, home_path, FLAGS.model_name) 
     num_label = int(np.max(train_labels)+1)
 
     dataset_len, *image_size = train_images.shape
@@ -63,6 +63,7 @@ def main(_):
         global_step = tf.train.create_global_step()
         epoch = tf.floor_div(tf.cast(global_step, tf.float32)*batch_size, dataset_len)
         max_number_of_steps = int(dataset_len*total_epoch)//batch_size+1
+        # print(LR)
 
         # make learning rate scheduler
         LR = learning_rate_scheduler(Learning_rate, [epoch, init_epoch, train_epoch], [0.3, 0.6, 0.8], 0.1)

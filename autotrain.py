@@ -5,7 +5,7 @@ import scipy.io as sio
 import numpy as np
 
 base_path = 'Test/mhgd'
-for i in range(5):
+for i in range(1):
     subprocess.call('python KD_methods_with_TF/train_w_distill.py '
                    +'--train_dir=%s%d '%(base_path,i)
                    +'--model_name=ResNet '

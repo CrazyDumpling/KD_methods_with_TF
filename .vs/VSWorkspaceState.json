@@ -1,0 +1,12 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\.ipynb_checkpoints",
+    "\\kdsvd",
+    "\\nets",
+    "\\pre_trained",
+    "\\__pycache__"
+  ],
+  "SelectedNode": "\\nets\\SVP.py",
+  "PreviewInSolutionExplorer": false
+}

@@ -16,6 +16,9 @@ def SVD(X, n, name = None):
             n = 1
         _, HW, D = x.get_shape().as_list()
 
+        # tf.logging.info(X.get_shape())
+        # tf.logging.info(x.get_shape())
+
         with tf.device('CPU'):
             g = tf.get_default_graph()
             with g.gradient_override_map({"Svd": "Svd_"}):
@@ -24,11 +27,19 @@ def SVD(X, n, name = None):
         s = removenan(s)
         v = removenan(v)
         u = removenan(u)
+
+        # tf.logging.info(s.get_shape())
+        # tf.logging.info(u.get_shape())
+        # tf.logging.info(v.get_shape())
         
         if n > 0:
             s = tf.nn.l2_normalize(tf.slice(s,[0,0],[-1,n]),1)
             u = tf.nn.l2_normalize(tf.slice(u,[0,0,0],[-1,-1,n]),1)
             v = tf.nn.l2_normalize(tf.slice(v,[0,0,0],[-1,-1,n]),1)
+
+        # tf.logging.info(s.get_shape())
+        # tf.logging.info(u.get_shape())
+        # tf.logging.info(v.get_shape())
         
         return s, u, v
 
@@ -84,11 +95,16 @@ def SVD_eid(X, n, name = None):
 def Align_rsv(x, y):
     with tf.variable_scope('Align'):
         cosine = tf.matmul(x, y, transpose_a=True)
+        # tf.logging.info(x.get_shape())
+        # tf.logging.info(y.get_shape())
+        # 
+        # tf.logging.info(cosine.get_shape())
+        # print(cosine)
         mask = tf.where(tf.equal(tf.reduce_max(tf.abs(cosine), 1,keepdims=True), tf.abs(cosine)),
                        tf.sign(cosine), tf.zeros_like(cosine))
         x = tf.matmul(x, mask)
         return x, y
-    
+
 @tf.RegisterGradient('Svd_')
 def gradient_svd(op, ds, dU, dV):
     s, U, V = op.outputs
@@ -131,5 +147,5 @@ def gradient_eid(op, ds, dU, dV):
     return gradient_svd(op, ds, dU, dV) + [None]*3
 
 @function.Defun(tf.float32, tf.float32,tf.float32,tf.float32,func_name = 'EID', python_grad_func = gradient_eid)
-def SVD_grad_map(x, s, u, v):
+def SVD_grad_map(x, s, u, v): 
     return s,u,v 

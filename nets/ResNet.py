@@ -114,7 +114,8 @@ def ResNet(image, label, scope, is_training, Distill = None):
                 tf.add_to_collection('dist', Shared.FSP(student_feats, teacher_feats))
             elif Distill[:3] == 'KD-':
                 tf.add_to_collection('dist', Shared.KD_SVD(student_feats, teacher_feats, Distill[-3:]))
-
+            elif Distill == 'SVD-PLUS':
+                tf.add_to_collection('dist', Shared.SVD_PLUS(student_feats, teacher_feats))
             elif Distill == 'RKD':
                 tf.add_to_collection('dist', Relation.RKD(fcs, fct, l = [25,50]))
             elif Distill == 'MHGD':
