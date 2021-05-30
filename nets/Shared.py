@@ -88,14 +88,14 @@ def SVD_PLUS(student_feature_maps, teacher_feature_maps):
     '''
     ZiJie Song.
     '''
-    with tf.variable_scope('Distillation'):
+    with tf.variable_scope('SVD_PLUS'):
         GNN_losses = []
         K = 1
         size = [64,128,256]
         for i, sfm, tfm in zip(range(len(student_feature_maps)), student_feature_maps, teacher_feature_maps):
             with tf.variable_scope('Compress_feature_map%d'%i):
-                Sigma_T, U_T, V_T = SVP.SVD(tfm, K, name = 'TSVD%d'%i)
-                Sigma_S, U_S, V_S = SVP.SVD(sfm, K+3, name = 'SSVD%d'%i)
+                Sigma_T, U_T, V_T = SVP.SVD(tfm, K, name = 'TSVD_%d'%i)
+                Sigma_S, U_S, V_S = SVP.SVD(sfm, K+3, name = 'SSVD_%d'%i)
                 B, D,_ = V_S.get_shape().as_list()
                 V_S, V_T = SVP.Align_rsv(V_S, V_T)
                 
@@ -103,35 +103,22 @@ def SVD_PLUS(student_feature_maps, teacher_feature_maps):
                 V_T *= Sigma_T
                 V_S *= Sigma_T
 
-            # vt_shape = V_T.get_shape().as_list()
-            # vs_shape = V_S.get_shape().as_list()
-            # tf.logging.info(V_T.get_shape())
-            # tf.logging.info(V_S.get_shape())
-            # V_T = tf.reshape(V_T,[-1,size[i]])
-            # V_S = tf.reshape(V_S,[-1,size[i]])
-
             with tcf.arg_scope([tcl.fully_connected, tcl.batch_norm], trainable = True):
                 with tcf.arg_scope([tcl.batch_norm], is_training = True):
-                    std = tcl.fully_connected(V_S , 1,
+                    with tf.variable_scope('RBF%d'%i):
+                        std = tcl.fully_connected(V_S , 1,
                                              biases_initializer = tf.zeros_initializer(),
                                              biases_regularizer = tcl.l2_regularizer(5e-4),
-                                             scope = 'full%d'%i)
-                    std = tcl.batch_norm(std, scope='bn%d'%i)
+                                             scope = 'full_distill%d'%i)
 
-                    # tf.logging.info(std.get_shape())
-                    # tf.logging.info(V_T.get_shape())
+                        # std = tf.zeros([1,1,size[i]])
+                        std = tcl.batch_norm(std, scope='bn_distill%d'%i)
 
-                    loss = tf.matmul(tf.stop_gradient(std),tf.stop_gradient(V_T),transpose_a = True)
-
-                    # tf.logging.info(loss.get_shape())
+                        loss = tf.matmul(std,tf.stop_gradient(V_T),transpose_a = True)
+                        loss = tf.where(tf.is_finite(loss), loss, tf.zeros_like(loss))
                     
-                    GNN_losses.append(tf.reduce_sum(loss))
-                    
-                    # tf.logging.info(GNN_losses.get_shape())
+                        GNN_losses.append(tf.reduce_sum(loss))
 
-        # transfer_loss = tf.constant(0,tf.float32)
-        transfer_loss =  tf.add_n(GNN_losses)
-
-        # tf.logging.info(transfer_loss.get_shape())
+        transfer_loss = tf.add_n(GNN_losses)
 
         return transfer_loss
