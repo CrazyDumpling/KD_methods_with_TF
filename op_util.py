@@ -24,13 +24,13 @@ def Optimizer_w_Distillation(class_loss, LR, epoch, init_epoch, global_step, Dis
             tf.summary.scalar('loss/total_loss', total_loss)
             gradients  = optimize.compute_gradients(total_loss, var_list = variables)
             
-        elif Distillation in {'AT', 'RKD', 'VID'}:
+        elif Distillation in {'AT', 'RKD', 'VID','SVD-PLUS'}:
             # simple multi-task learning
             total_loss = class_loss + tf.add_n(tf.losses.get_regularization_losses()) + tf.get_collection('dist')[0]
             tf.summary.scalar('loss/total_loss', total_loss)
             gradients  = optimize.compute_gradients(total_loss, var_list = variables)
             
-        elif Distillation[:3] == 'KD-' or 'SVD':
+        elif Distillation[:3] == 'KD-':
             # multi-task learning w/ distillation gradients clipping
             # distillation gradients are clipped by norm of main-task gradients
             reg_loss = tf.add_n(tf.losses.get_regularization_losses())
@@ -48,7 +48,7 @@ def Optimizer_w_Distillation(class_loss, LR, epoch, init_epoch, global_step, Dis
             # tf.logging.info(gradient_wdecay.get_shape())
             # tf.logging.info(gradients.get_shape())
             
-            '''
+            
             with tf.variable_scope('clip_grad'):
                 for i, (gc, gw, gd) in enumerate(zip(gradients,gradient_wdecay,gradient_dist)):
                     gw = 0. if gw[0] is None else gw[0]
@@ -57,7 +57,7 @@ def Optimizer_w_Distillation(class_loss, LR, epoch, init_epoch, global_step, Dis
                         gradients[i] = (gc[0] + gw + tf.clip_by_norm(gd[0], norm), gc[1])
                     elif gc[0] != None:
                         gradients[i] = (gc[0] + gw, gc[1])
-            '''
+            
                         
             if Distillation[-3:] == 'SVP':
                 gradient_dist += optimize.compute_gradients(tf.add_n(tf.get_collection('basis_loss')),

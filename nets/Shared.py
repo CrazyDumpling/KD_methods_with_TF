@@ -95,7 +95,7 @@ def SVD_PLUS(student_feature_maps, teacher_feature_maps):
         for i, sfm, tfm in zip(range(len(student_feature_maps)), student_feature_maps, teacher_feature_maps):
             with tf.variable_scope('Compress_feature_map%d'%i):
                 Sigma_T, U_T, V_T = SVP.SVD(tfm, K, name = 'TSVD_%d'%i)
-                Sigma_S, U_S, V_S = SVP.SVD(sfm, K+3, name = 'SSVD_%d'%i)
+                Sigma_S, U_S, V_S = SVP.SVD(sfm, K+1, name = 'SSVD_%d'%i)
                 B, D,_ = V_S.get_shape().as_list()
                 V_S, V_T = SVP.Align_rsv(V_S, V_T)
                 
@@ -111,14 +111,18 @@ def SVD_PLUS(student_feature_maps, teacher_feature_maps):
                                              biases_regularizer = tcl.l2_regularizer(5e-4),
                                              scope = 'full_distill%d'%i)
 
+                        # tf.logging.info(std.get_shape())
+                        # tf.logging.info(V_T.get_shape())
                         # std = tf.zeros([1,1,size[i]])
                         std = tcl.batch_norm(std, scope='bn_distill%d'%i)
-
-                        loss = tf.matmul(std,tf.stop_gradient(V_T),transpose_a = True)
-                        loss = tf.where(tf.is_finite(loss), loss, tf.zeros_like(loss))
+                        l2loss = (std-tf.stop_gradient(V_T))**2
+                        l2loss = tf.where(tf.is_finite(l2loss), l2loss, tf.zeros_like(l2loss))
+                        
+                        l2loss = tf.sigmoid(l2loss)
                     
-                        GNN_losses.append(tf.reduce_sum(loss))
+                        GNN_losses.append(tf.reduce_sum(l2loss))
 
         transfer_loss = tf.add_n(GNN_losses)
+        # tf.logging.info(transfer_loss.get_shape())
 
         return transfer_loss
