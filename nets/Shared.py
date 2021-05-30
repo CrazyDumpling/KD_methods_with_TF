@@ -118,12 +118,12 @@ def SVD_PLUS(student_feature_maps, teacher_feature_maps):
                                              scope = 'full%d'%i)
                     std = tcl.batch_norm(std, scope='bn%d'%i)
 
-                    tf.logging.info(std.get_shape())
-                    tf.logging.info(V_T.get_shape())
+                    # tf.logging.info(std.get_shape())
+                    # tf.logging.info(V_T.get_shape())
 
                     loss = tf.matmul(tf.stop_gradient(std),tf.stop_gradient(V_T),transpose_a = True)
 
-                    tf.logging.info(loss.get_shape())
+                    # tf.logging.info(loss.get_shape())
                     
                     GNN_losses.append(tf.reduce_sum(loss))
                     
@@ -132,6 +132,6 @@ def SVD_PLUS(student_feature_maps, teacher_feature_maps):
         # transfer_loss = tf.constant(0,tf.float32)
         transfer_loss =  tf.add_n(GNN_losses)
 
-        tf.logging.info(transfer_loss.get_shape())
+        # tf.logging.info(transfer_loss.get_shape())
 
         return transfer_loss
