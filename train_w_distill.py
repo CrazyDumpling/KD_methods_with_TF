@@ -99,7 +99,7 @@ def main(_):
         config = ConfigProto()
         config.gpu_options.visible_device_list = gpu_num
         config.gpu_options.allow_growth=True
-        config.gpu_options.per_process_gpu_memory_fraction = 0.4
+        config.gpu_options.per_process_gpu_memory_fraction = 0.3
         
         val_itr = len(val_labels)//val_batch_size
         logs = {'training_acc' : [], 'validation_acc' : []}
