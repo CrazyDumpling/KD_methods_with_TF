@@ -116,13 +116,13 @@ def SVD_PLUS(student_feature_maps, teacher_feature_maps):
                         # std = tf.zeros([1,1,size[i]])
 
                         std = tcl.batch_norm(std, scope='bn_distill%d'%i)
-                        l2loss = (std-tf.stop_gradient(V_T))**2
+                        l2loss = tf.square((std-tf.stop_gradient(V_T))**2)
                         l2loss = tf.where(tf.is_finite(l2loss), l2loss, tf.zeros_like(l2loss))
 
                         # tf.logging.info(l2loss.get_shape())
                         
                         # l2loss = tf.sigmoid(l2loss)
-                    
+                        
                         GNN_losses.append(tf.reduce_sum(l2loss))
 
         transfer_loss = tf.add_n(GNN_losses)
