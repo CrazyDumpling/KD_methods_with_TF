@@ -28,7 +28,7 @@ def Optimizer_w_Distillation(class_loss, LR, epoch, init_epoch, global_step, Dis
             # simple multi-task learning
             total_loss = class_loss + tf.add_n(tf.losses.get_regularization_losses()) + tf.get_collection('dist')[0]
             tf.summary.scalar('loss/total_loss', total_loss)
-            gradients  = optimize.compute_gradients(class_loss, var_list = variables)
+            gradients  = optimize.compute_gradients(total_loss, var_list = variables)
             
         elif Distillation[:3] == 'KD-':
             # multi-task learning w/ distillation gradients clipping
