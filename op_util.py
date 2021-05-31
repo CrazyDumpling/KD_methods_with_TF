@@ -44,11 +44,6 @@ def Optimizer_w_Distillation(class_loss, LR, epoch, init_epoch, global_step, Dis
             gradient_wdecay = optimize.compute_gradients(reg_loss,          var_list = variables)
             gradient_dist   = optimize.compute_gradients(distillation_loss, var_list = variables)
 
-            # tf.logging.info(gradients.get_shape())
-            # tf.logging.info(gradient_wdecay.get_shape())
-            # tf.logging.info(gradients.get_shape())
-            
-            
             with tf.variable_scope('clip_grad'):
                 for i, (gc, gw, gd) in enumerate(zip(gradients,gradient_wdecay,gradient_dist)):
                     gw = 0. if gw[0] is None else gw[0]
@@ -57,7 +52,6 @@ def Optimizer_w_Distillation(class_loss, LR, epoch, init_epoch, global_step, Dis
                         gradients[i] = (gc[0] + gw + tf.clip_by_norm(gd[0], norm), gc[1])
                     elif gc[0] != None:
                         gradients[i] = (gc[0] + gw, gc[1])
-            
                         
             if Distillation[-3:] == 'SVP':
                 gradient_dist += optimize.compute_gradients(tf.add_n(tf.get_collection('basis_loss')),
