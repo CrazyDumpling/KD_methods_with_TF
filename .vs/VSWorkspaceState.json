@@ -7,6 +7,6 @@
     "\\pre_trained",
     "\\__pycache__"
   ],
-  "SelectedNode": "\\nets\\Shared.py",
+  "SelectedNode": "\\train_w_distill.py",
   "PreviewInSolutionExplorer": false
 }

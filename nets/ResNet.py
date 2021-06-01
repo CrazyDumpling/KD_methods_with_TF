@@ -43,7 +43,7 @@ def ResNet(image, label, scope, is_training, Distill = None):
         nChannels = [16, 32, 64, 128, 256, 512]
         stride = [1,2,2,2,2]
         
-    n = 1 if scope != 'Teacher' else 5
+    n = 2 if scope != 'Teacher' else 5
     
     with tf.variable_scope(scope):
         with tcf.arg_scope([tcl.conv2d, tcl.fully_connected, tcl.batch_norm], trainable = True):
